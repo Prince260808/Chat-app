@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import OauthSuccess from "./pages/OauthSuccess";
+import OauthSuccess from "./pages/OauthSuccess"
 import Chat from "./pages/Chat";
 import ProtectedRoutes from "./utils/ProtectedRoutes";
 

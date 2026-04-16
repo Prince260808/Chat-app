@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { api } from "../api/axios";
 
-export default function OAuthSuccess() {
+export default function OauthSuccess() {
   const [params] = useSearchParams();
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();

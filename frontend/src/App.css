@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: #0f0f13;
+}
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  
+  .glass {
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  
+  .msg-bubble-sent {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border-radius: 18px 18px 4px 18px;
+  }
+  .msg-bubble-recv {
+    background: rgba(255,255,255,0.08);
+    border-radius: 18px 18px 18px 4px;
+  }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes pulse-dot {
+  0%,100% { transform: scale(1); opacity: 0.4; }
+  50% { transform: scale(1.4); opacity: 1; }
+}
+
+.msg-enter { animation: slideUp 0.25s ease forwards; }
+.fade-in { animation: fadeIn 0.3s ease forwards; }
+.dot1 { animation: pulse-dot 1.2s ease infinite 0s; }
+.dot2 { animation: pulse-dot 1.2s ease infinite 0.2s; }
+.dot3 { animation: pulse-dot 1.2s ease infinite 0.4s; }

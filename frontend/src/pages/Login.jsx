@@ -27,7 +27,7 @@ export default function Login() {
   };
 
   const googleLogin = () => {
-    window.location.href = "http://localhost:5000/api/auth/google";
+    window.location.href = "https://chat-app-l9ba.onrender.com/api/auth/google";
   };
 
   return (

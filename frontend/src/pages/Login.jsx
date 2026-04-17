@@ -26,9 +26,9 @@ export default function Login() {
     }
   };
 
-  const googleLogin = () => {
-    window.location.href = "https://chat-app-l9ba.onrender.com/api/auth/google";
-  };
+  // const googleLogin = () => {
+  //   window.location.href = "https://chat-app-l9ba.onrender.com/api/auth/google";
+  // };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0f0f13] relative overflow-hidden">
@@ -104,7 +104,7 @@ export default function Login() {
             <span className="text-zinc-500 text-xs">or</span>
             <div className="flex-1 h-px bg-white/10" />
           </div>
-
+{/* 
           <button
             onClick={googleLogin}
             className="w-full flex items-center justify-center gap-3 py-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-white text-sm font-medium transition-all"
@@ -116,7 +116,7 @@ export default function Login() {
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
             Continue with Google
-          </button>
+          </button> */}
 
           <p className="text-center mt-6 text-zinc-500 text-sm">
             New here?{" "}

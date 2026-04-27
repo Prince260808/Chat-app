@@ -16,13 +16,13 @@ dotenv.config();
 const app = express();
 const httpServer = createServer(app);
 
-// ✅ FRONTEND URL (LOCAL + PRODUCTION SAFE)
+// FRONTEND URL (LOCAL + PRODUCTION SAFE)
 const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
 
 // ─── MIDDLEWARE ────────────────────────────────────────────────
 app.use(express.json());
 
-// ✅ CORS FIX (IMPORTANT FOR DEPLOYMENT)
+// CORS FIX (IMPORTANT FOR DEPLOYMENT)
 app.use(
   cors({
     origin: CLIENT_URL,
@@ -37,7 +37,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false, // set TRUE only if using HTTPS with proper cookies
+      secure: false, 
       sameSite: "lax",
     },
   })

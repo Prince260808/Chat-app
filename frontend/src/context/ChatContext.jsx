@@ -1,14 +1,21 @@
-import { createContext, useState, useEffect, useCallback, useRef } from "react";
+import {
+  createContext,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+} from "react";
 import { api } from "../api/axios";
 import { io } from "socket.io-client";
 
 export const ChatContext = createContext();
 
-// ✅ USE ENV FOR DEPLOYMENT
 const ENDPOINT = import.meta.env.VITE_API_URL;
-let socket;
 
 export const ChatProvider = ({ children }) => {
+  const socketRef = useRef(null);
+  const selectedChatRef = useRef(null);
+
   const [chats, setChats] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -16,36 +23,48 @@ export const ChatProvider = ({ children }) => {
   const [socketConnected, setSocketConnected] = useState(false);
   const [notifications, setNotifications] = useState([]);
 
-  const selectedChatRef = useRef(null);
-  selectedChatRef.current = selectedChat;
+  // keep ref updated
+  useEffect(() => {
+    selectedChatRef.current = selectedChat;
+  }, [selectedChat]);
 
   // ─────────────────────────────────────────────
-  // SOCKET CONNECTION (PRODUCTION SAFE)
+  // SOCKET SETUP (PRODUCTION READY)
   // ─────────────────────────────────────────────
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
+
     if (!user || !ENDPOINT) return;
 
-    socket = io(ENDPOINT, {
+    socketRef.current = io(ENDPOINT, {
       withCredentials: true,
-      transports: ["websocket", "polling"],
+      transports: ["websocket"],
+      reconnection: true,
+      reconnectionAttempts: 5,
     });
 
-    socket.emit("setup", user);
+    // ✅ IMPORTANT FIX: send only user._id
+    socketRef.current.emit("setup", user._id);
 
-    socket.on("connected", () => setSocketConnected(true));
-    socket.on("typing", () => setIsTyping(true));
-    socket.on("stop typing", () => setIsTyping(false));
+    socketRef.current.on("connected", () => {
+      setSocketConnected(true);
+      console.log("✅ Socket connected");
+    });
 
-    socket.on("message received", (newMsg) => {
+    socketRef.current.on("typing", () => setIsTyping(true));
+    socketRef.current.on("stop typing", () => setIsTyping(false));
+
+    socketRef.current.on("message received", (newMsg) => {
       const current = selectedChatRef.current;
 
+      // If message not for current chat → notification
       if (!current || current._id !== newMsg.chat._id) {
         setNotifications((prev) => [newMsg, ...prev]);
       } else {
         setMessages((prev) => [...prev, newMsg]);
       }
 
+      // update latest message in chat list
       setChats((prev) =>
         prev.map((c) =>
           c._id === newMsg.chat._id
@@ -56,14 +75,18 @@ export const ChatProvider = ({ children }) => {
     });
 
     return () => {
-      socket.disconnect();
-      socket = null;
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+        socketRef.current = null;
+        console.log("❌ Socket disconnected");
+      }
     };
   }, []);
 
   // ─────────────────────────────────────────────
   // API FUNCTIONS
   // ─────────────────────────────────────────────
+
   const fetchChats = useCallback(async () => {
     try {
       const { data } = await api.get("/chat");
@@ -76,9 +99,11 @@ export const ChatProvider = ({ children }) => {
   const fetchMessages = useCallback(async (chatId) => {
     try {
       const { data } = await api.get("/message/" + chatId);
+
       setMessages(data);
 
-      socket?.emit("join chat", chatId);
+      // join socket room
+      socketRef.current?.emit("join chat", chatId);
     } catch (err) {
       console.error("fetchMessages:", err.message);
     }
@@ -86,15 +111,17 @@ export const ChatProvider = ({ children }) => {
 
   const sendMessage = async (chatId, content) => {
     try {
-      socket?.emit("stop typing", chatId);
+      socketRef.current?.emit("stop typing", chatId);
 
       const { data } = await api.post("/message", {
         content,
         chatId,
       });
 
-      socket?.emit("new message", data);
+      // emit real-time
+      socketRef.current?.emit("new message", data);
 
+      // update UI instantly
       setMessages((prev) => [...prev, data]);
 
       setChats((prev) =>
@@ -152,9 +179,7 @@ export const ChatProvider = ({ children }) => {
       });
 
       setChats((prev) =>
-        prev.map((c) =>
-          c._id === data._id ? data : c
-        )
+        prev.map((c) => (c._id === data._id ? data : c))
       );
 
       if (selectedChat?._id === data._id) {
@@ -195,11 +220,16 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
-  const emitTyping = (chatId) =>
-    socket?.emit("typing", chatId);
+  // ─────────────────────────────────────────────
+  // SOCKET HELPERS
+  // ─────────────────────────────────────────────
+  const emitTyping = (chatId) => {
+    socketRef.current?.emit("typing", chatId);
+  };
 
-  const emitStopTyping = (chatId) =>
-    socket?.emit("stop typing", chatId);
+  const emitStopTyping = (chatId) => {
+    socketRef.current?.emit("stop typing", chatId);
+  };
 
   // ─────────────────────────────────────────────
   // PROVIDER
